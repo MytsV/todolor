@@ -1,0 +1,17 @@
+{
+  "name": "todolor",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "mocha --reporter spec",
+    "lint-check": "eslint *.js src/**/*.js test/**/*.js",
+    "lint-fix": "eslint *.js src/**/*.js test/**/*.js --fix"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "eslint": "^8.41.0",
+    "eslint-config-google": "^0.14.0",
+    "mocha": "^10.2.0"
+  }
+}
