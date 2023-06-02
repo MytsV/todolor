@@ -4,7 +4,7 @@ const {expect} = require('chai');
 
 const os = require('os');
 const fs = require('fs');
-const {readConfig} = require('../src/config');
+const {read: readConfig} = require('../src/config');
 
 const unreadable = 0o000;
 const corruptedMsg = 'Corrupted configuration file';

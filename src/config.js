@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 
 const configName = '.todolor.conf';
-const defaultPath = '.todolor';
+
+const getDefaultPath = () => path.join(os.homedir(), '.todolor');
 
 // TODO: Write a small util to paint text
 const yellowAnsi = '\x1b[33m';
@@ -44,25 +45,22 @@ const parse = (content) => {
   return result;
 };
 
-const createConfig = (configPath) => {
-  const databasePath = path.join(os.homedir(), defaultPath);
-  const entry = `PATH=${databasePath}`;
-  fs.writeFileSync(configPath, entry);
-  return databasePath;
+const createConfig = (configPath, content) => {
+  console.log(`${yellowAnsi}${configPath} not found${defaultAnsi}`);
+  fs.writeFileSync(configPath, content);
+  console.log(`${yellowAnsi}Initialized ${configPath}${defaultAnsi}`);
 };
 
-const readConfig = () => {
+const read = () => {
   const configPath = path.join(os.homedir(), configName);
   let content;
   try {
     content = fs.readFileSync(configPath);
   } catch (e) {
-    console.log(`${yellowAnsi}${configPath} not found${defaultAnsi}`);
-    const result = createConfig(configPath);
-    console.log(`${yellowAnsi}Initialized ${configPath}${defaultAnsi}`);
-    return {path: result};
+    content = `PATH=${getDefaultPath()}`;
+    createConfig(configPath, content);
   }
   return parse(content.toString());
 };
 
-module.exports = {readConfig};
+module.exports = {read};
