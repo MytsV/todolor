@@ -16,7 +16,7 @@ const parse = (contents) => {
   if (!result || result.length === 0) {
     throw Error('Corrupted configuration file');
   } else {
-    return result[0];
+    return result[1];
   }
 };
 
