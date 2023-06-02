@@ -27,7 +27,7 @@ const createConfig = (configPath) => {
   return databasePath;
 };
 
-const getDatabasePath = () => {
+const readConfig = () => {
   const configPath = path.join(os.homedir(), configName);
   let contents;
   try {
@@ -36,9 +36,9 @@ const getDatabasePath = () => {
     console.log(`${yellowAnsi}${configPath} not found${defaultAnsi}`);
     const result = createConfig(configPath);
     console.log(`${yellowAnsi}Initialized ${configPath}${defaultAnsi}`);
-    return result;
+    return {path: result};
   }
-  return parse(contents);
+  return {path: parse(contents)};
 };
 
-module.exports = {getDatabasePath};
+module.exports = {readConfig};
