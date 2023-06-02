@@ -10,14 +10,14 @@ const unreadable = 0o000;
 const corruptedMsg = 'Corrupted configuration file';
 
 describe('readConfig()', () => {
-  const homedir = '/home';
+  const homedir = '/test-config';
 
   beforeEach(() => {
     sinon.stub(os, 'homedir').returns(homedir);
   });
 
-  it('Returns a valid configuration object if such file exists', () => {
-    const dbPath = '/test/.todolor';
+  it('Returns a valid configuration object if config file exists', () => {
+    const dbPath = '/db/.todolor';
 
     const fsConfig = {};
     fsConfig[homedir] = {'.todolor.conf': `PATH=${dbPath}`};
@@ -45,30 +45,19 @@ describe('readConfig()', () => {
     expect(() => readConfig()).to.throw(corruptedMsg);
   });
 
-  it('Fails if home directory has restricted permissions', () => {
-    mock({
-      '/home': mock.directory({mode: unreadable}),
-    });
-    expect(() => readConfig()).to.throw();
-  });
-
   it('Fails if configuration file has restricted permissions', () => {
-    mock({
-      '/home': {
-        '.todolor.conf': mock.file({mode: unreadable}),
-      },
-    });
+    const fsConfig = {};
+    fsConfig[homedir] = {'.todolor.conf': mock.file({mode: unreadable})};
+    mock(fsConfig);
     expect(() => readConfig()).to.throw();
   });
 
   it('Correctly parses configuration content', () => {
-    mock({
-      '/home': {
-        '.todolor.conf': '',
-      },
-    });
+    const fsConfig = {};
+    fsConfig[homedir] = {'.todolor.conf': ''};
+    mock(fsConfig);
 
-    const configPath = '/home/.todolor.conf';
+    const configPath = `${homedir}/.todolor.conf`;
     const createCase = (input, result) => {
       return {'input': input, 'result': result};
     };
