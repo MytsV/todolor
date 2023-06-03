@@ -5,9 +5,10 @@ const {SimpleDatabase} = require('../src/database');
 const {encode} = require('../src/cipher');
 
 const headerLength = 2;
+const dir = '/test-db';
 const entryType = 'test';
 
-const testGetAll = (dir) => {
+const testGetAll = () => {
   it('Returns an empty array if there are no entries yet', () => {
     const db = new SimpleDatabase(dir);
     expect(db.getAll(entryType)).to.deep.equal([]);
@@ -67,7 +68,7 @@ const testGetAll = (dir) => {
   });
 };
 
-const testAdd = (dir) => {
+const testAdd = () => {
   it('Successfully adds correct entities to an empty database', () => {
     const cases = [
       {'hello': 'world'},
@@ -115,7 +116,7 @@ const testAdd = (dir) => {
   });
 };
 
-const testEdit = (dir) => {
+const testEdit = () => {
   it('Fails if an entity is incorrect', () => {
     const cases = [
       // No ID - no idea what is edited
@@ -155,7 +156,7 @@ const testEdit = (dir) => {
   });
 };
 
-const testDelete = (dir) => {
+const testDelete = () => {
   it('Fails if there is no such id', () => {
     const db = new SimpleDatabase(dir);
     expect(() => db.delete(entryType, 0)).to.throw();
@@ -178,7 +179,7 @@ const testDelete = (dir) => {
   });
 };
 
-const initMock = (dir) => {
+const initMock = () => {
   const fsConfig = {};
   fsConfig[dir] = {};
   mock(fsConfig);
@@ -187,8 +188,6 @@ const initMock = (dir) => {
 const restoreMock = () => mock.restore();
 
 describe('SimpleDatabase', () => {
-  const dir = '/test-db';
-
   beforeEach(() => initMock(dir));
 
   describe('new SimpleDatabase(dir)', () => {
@@ -203,27 +202,16 @@ describe('SimpleDatabase', () => {
     afterEach(restoreMock);
   });
 
-  describe('getAll(type)', () => {
-    beforeEach(() => initMock(dir));
-    testGetAll(dir);
-    afterEach(restoreMock);
-  });
+  const testMethod = (name, fn) => {
+    describe(name, () => {
+      beforeEach(() => initMock(dir));
+      fn();
+      afterEach(restoreMock);
+    });
+  };
 
-  describe('add(type, entity)', () => {
-    beforeEach(() => initMock(dir));
-    testAdd(dir);
-    afterEach(restoreMock);
-  });
-
-  describe('edit(type, entity)', () => {
-    beforeEach(() => initMock(dir));
-    testEdit(dir);
-    afterEach(restoreMock);
-  });
-
-  describe('delete(type, id)', () => {
-    beforeEach(() => initMock(dir));
-    testDelete(dir);
-    afterEach(restoreMock);
-  });
+  testMethod('getAll(type)', testGetAll);
+  testMethod('add(type, entity)', testAdd);
+  testMethod('edit(type, entity)', testEdit);
+  testMethod('delete(type, id)', testDelete);
 });
