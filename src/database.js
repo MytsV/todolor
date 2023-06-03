@@ -2,18 +2,6 @@ const fs = require('fs');
 const {decode, encode} = require('./cipher');
 const path = require('path');
 
-const readContent = (path) => {
-  if (!fs.existsSync(path)) {
-    fs.writeFileSync(path, '');
-  }
-  const result = fs.readFileSync(path);
-  return decode(result);
-};
-
-const writeContent = (path, bytes) => {
-  fs.writeFileSync(path, encode(bytes));
-};
-
 // ID length in bytes
 const idSize = 2;
 
@@ -105,9 +93,7 @@ class SimpleDatabase {
     entityClone['id'] = data.lastIdx;
     data.entities.push(entityClone);
 
-    const documentPath = path.join(this.dir, type);
-    writeContent(documentPath, toBytes(data));
-
+    this.#writeData(type, data);
     return data.lastIdx;
   }
 
@@ -131,9 +117,7 @@ class SimpleDatabase {
     }
     Object.assign(editedEntity, entity);
 
-    const documentPath = path.join(this.dir, type);
-    writeContent(documentPath, toBytes(data));
-
+    this.#writeData(type, data);
     return entity.id;
   }
 
@@ -150,19 +134,32 @@ class SimpleDatabase {
     }
     data.entities.splice(entityIdx, 1);
 
-    const documentPath = path.join(this.dir, type);
-    writeContent(documentPath, toBytes(data));
+    this.#writeData(type, data);
   }
 
   /**
    * A shorthand for reading and parsing database content
    * @param {string} type
    * @return {object}
-  */
+   */
   #retrieveData(type) {
-    const documentPath = path.join(this.dir, type);
-    const content = readContent(documentPath);
-    return parse(content);
+    const typePath = path.join(this.dir, type);
+    if (!fs.existsSync(typePath)) {
+      fs.writeFileSync(typePath, '');
+    }
+    const result = fs.readFileSync(typePath);
+    const decoded = decode(result);
+    return parse(decoded);
+  }
+
+  /**
+   * A shorthand for updating database content
+   * @param {string} type
+   * @param {object} data
+   */
+  #writeData(type, data) {
+    const typePath = path.join(this.dir, type);
+    fs.writeFileSync(typePath, encode(toBytes(data)));
   }
 }
 
