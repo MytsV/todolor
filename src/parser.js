@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
 const moment = require('moment');
@@ -46,7 +47,7 @@ const arg = yargs(hideBin(process.argv))
         demandOption: true,
         coerce: (id) => {
           if (id.length !== 16) {
-            throw new Error('ID must be a string with a length of 10');
+            throw new Error('ID must be a string with a length of 16');
           }
           return id;
         },
@@ -54,6 +55,17 @@ const arg = yargs(hideBin(process.argv))
     })
     .command('add', 'Add new task', (yargs) => {
       yargs
+          .positional('id', {
+            describe: 'task\'s hash index',
+            type: 'string',
+            demandOption: true,
+            coerce: (id) => {
+              if (id.length !== 16) {
+                throw new Error('ID must be a string with a length of 16');
+              }
+              return id;
+            },
+          })
           .group(['name', 'desc', 'deadline'], 'Task Options:')
           .option('name', {
             describe: 'Name of the task',
@@ -81,6 +93,38 @@ const arg = yargs(hideBin(process.argv))
             },
           })
           .strictOptions();
+    })
+    .command('edit <id>', 'Edit a task', (yargs) => {
+      yargs
+          .group(['name', 'desc', 'deadline'], 'Task Options:')
+          .option('name', {
+            describe: 'Name of the task',
+            alias: 'n',
+            type: 'string',
+          })
+          .option('desc', {
+            describe: 'Description of the task',
+            alias: 'd',
+            type: 'string',
+          })
+          .option('deadline', {
+            describe: 'Task\'s deadline',
+            alias: 'l',
+            type: 'date',
+            coerce: (deadline) => {
+              const date = moment(deadline, 'YYYY-MM-DD HH:mm:ss', true);
+              if (!date.isValid()) {
+                throw new Error('Invalid deadline. Please provide a date in YYYY-MM-DD HH:MM:SS format.');
+              }
+              return date.format('YYYY-MM-DD HH:mm:ss');
+            },
+          })
+          .check((argv) => {
+            if (!(argv.name || argv.desc || argv.deadline)) {
+              throw new Error('At least one option is required');
+            }
+            return true;
+          });
     })
 //    .strict()
     .demandCommand(1, 'You need at least one command before moving on')
