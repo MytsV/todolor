@@ -1,5 +1,7 @@
 const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
+const moment = require('moment');
+
 const arg = yargs(hideBin(process.argv))
     .command('ls', 'Outputs the list of tasks', (yargs) => {
       yargs
@@ -49,6 +51,36 @@ const arg = yargs(hideBin(process.argv))
           return id;
         },
       });
+    })
+    .command('add', 'Add new task', (yargs) => {
+      yargs
+          .group(['name', 'desc', 'deadline'], 'Task Options:')
+          .option('name', {
+            describe: 'Name of the task',
+            alias: 'n',
+            type: 'string',
+            demandOption: true,
+          })
+          .option('desc', {
+            describe: 'Description of the task',
+            alias: 'd',
+            type: 'string',
+            demandOption: true,
+          })
+          .option('deadline', {
+            describe: 'Task\'s deadline',
+            alias: 'l',
+            type: 'data',
+            demandOption: true,
+            coerce: (deadline) => {
+              const date = moment(deadline, 'YYYY-MM-DD HH:mm:ss', true);
+              if (!date.isValid()) {
+                throw new Error('Invalid deadline. Please provide a date in YYYY-MM-DD HH:MM:SS format.');
+              }
+              return date.format('YYYY-MM-DD HH:mm:ss');
+            },
+          })
+          .strictOptions();
     })
 //    .strict()
     .demandCommand(1, 'You need at least one command before moving on')
