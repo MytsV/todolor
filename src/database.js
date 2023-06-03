@@ -89,6 +89,7 @@ class SimpleDatabase {
    * Appends an entity of certain type
    * @param {string} type
    * @param {object} entity
+   * @return {string | number}
    */
   add(type, entity) {
     if (!isEntityCorrect(entity)) {
@@ -106,12 +107,15 @@ class SimpleDatabase {
 
     const documentPath = path.join(this.dir, type);
     writeContent(documentPath, toBytes(data));
+
+    return data.lastIdx;
   }
 
   /**
    * Changes values of an entity of certain type
    * @param {string} type
    * @param {object} entity
+   * @return {string | number}
    */
   edit(type, entity) {
     if (entity.id === undefined) {
@@ -129,6 +133,8 @@ class SimpleDatabase {
 
     const documentPath = path.join(this.dir, type);
     writeContent(documentPath, toBytes(data));
+
+    return entity.id;
   }
 
   /**

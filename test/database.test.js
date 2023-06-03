@@ -132,10 +132,14 @@ const testEdit = (dir) => {
   it('Successfully both adds and edits key-values pairs', () => {
     const db = new SimpleDatabase(dir);
     const toEdit = {'hello': 'world', 'touch': 'me'};
-    const id = 0;
-    db.add(entryType, toEdit);
-    db.edit(entryType, {'touch': 'forbidden', 'new': 'value', 'id': id});
-    const edited = db.getAll(entryType)[id];
+    const id = db.add(entryType, toEdit);
+    const editId = db.edit(entryType, {
+      'touch': 'forbidden',
+      'new': 'value',
+      'id': id,
+    });
+    expect(id).to.equal(0).to.equal(editId);
+    const edited = db.getAll(entryType)[0];
     expect(edited).to.deep.equal({
       // Old values don't vanish
       'hello': 'world',
