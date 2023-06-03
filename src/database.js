@@ -1,5 +1,5 @@
 const fs = require('fs');
-const {decode} = require('./cipher');
+const {decode, encode} = require('./cipher');
 const path = require('path');
 
 const readContent = (path) => {
@@ -10,6 +10,21 @@ const readContent = (path) => {
   return decode(result);
 };
 
+const writeContent = (path, bytes) => {
+  fs.writeFileSync(path, encode(bytes));
+};
+
+// ID length in bytes
+const idSize = 2;
+
+const toBytes = (data) => {
+  const idBuffer = Buffer.alloc(idSize);
+  idBuffer.writeUInt16BE(data.lastIdx);
+  // Write json string with default UTF-8 encoding
+  const jsonBuffer = Buffer.from(JSON.stringify(data.entities));
+  return Buffer.concat([idBuffer, jsonBuffer]);
+};
+
 // Parses decoded database content into entities.
 const parse = (bytes) => {
   if (bytes.length === 0) return {'entities': []};
@@ -18,8 +33,11 @@ const parse = (bytes) => {
    It is stored in big endian format as unsigned int16.
    */
   const lastIdx = bytes.readUInt16BE();
-  // All other information is just a UTF-8 string with JSON data.
-  const info = bytes.subarray(2).toString();
+  /*
+   All other information is just a UTF-8 string with JSON data.
+   Buffer.toString() uses UTF-8 encoding by default.
+   */
+  const info = bytes.subarray(idSize).toString();
   const entities = JSON.parse(info);
   if (!Array.isArray(entities)) {
     throw new SyntaxError();
@@ -28,6 +46,20 @@ const parse = (bytes) => {
     lastIdx,
     'entities': entities,
   };
+};
+
+// Multiplying ID size in bytes by number of bits in a byte
+const idMax = 2 ** (idSize * 8) - 1;
+
+const isEntityCorrect = (entity) => {
+  for (const value of Object.values(entity)) {
+    if (typeof value === 'object') {
+      if (!isEntityCorrect(value)) return false;
+    } else if (typeof value !== 'string' && typeof value !== 'number') {
+      return false;
+    }
+  }
+  return true;
 };
 
 /** Implementation of single-file entity{key-value} storage */
@@ -61,7 +93,21 @@ class SimpleDatabase {
    * @param {object} entity
    */
   add(type, entity) {
-    throw Error('Not implemented');
+    if (!isEntityCorrect(entity)) {
+      throw Error('Entity terminal values may be only strings or numbers');
+    }
+    const documentPath = path.join(this.dir, type);
+    const content = readContent(documentPath);
+    const data = parse(content);
+    if (data.lastIdx === idMax) {
+      // TODO: reindexing operation to restore overflown database
+      throw Error('ID counter overflow');
+    }
+    data.lastIdx = data.lastIdx !== undefined ? data.lastIdx + 1 : 0;
+    const entityClone = Object.assign({}, entity);
+    entityClone['id'] = data.lastIdx;
+    data.entities.push(entityClone);
+    writeContent(documentPath, toBytes(data));
   }
 
   /**
