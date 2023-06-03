@@ -4,7 +4,7 @@ const {hideBin} = require('yargs/helpers');
 const moment = require('moment');
 
 const arg = yargs(hideBin(process.argv))
-    .command('ls', 'Outputs the list of tasks', (yargs) => {
+    .command('ls', 'Output the list of tasks', (yargs) => {
       yargs
           .group(['due', 'overdue', 'completed'], 'Filter Options:')
           .option('due', {
@@ -29,12 +29,12 @@ const arg = yargs(hideBin(process.argv))
     })
     .command('delete <id>', 'Delete task', (yargs) => {
       yargs.positional('id', {
-        describe: 'task\'s hash index',
+        describe: 'task\'s ID',
         type: 'string',
         demandOption: true,
         coerce: (id) => {
           if (id.length !== 16) {
-            throw new Error('ID must be a string with a length of 10');
+            throw new Error('ID must be a string with a length of 16');
           }
           return id;
         },
@@ -42,7 +42,7 @@ const arg = yargs(hideBin(process.argv))
     })
     .command('complete <id>', 'Complete task', (yargs) => {
       yargs.positional('id', {
-        describe: 'task\'s hash index',
+        describe: 'task\'s ID',
         type: 'string',
         demandOption: true,
         coerce: (id) => {
@@ -55,17 +55,6 @@ const arg = yargs(hideBin(process.argv))
     })
     .command('add', 'Add new task', (yargs) => {
       yargs
-          .positional('id', {
-            describe: 'task\'s hash index',
-            type: 'string',
-            demandOption: true,
-            coerce: (id) => {
-              if (id.length !== 16) {
-                throw new Error('ID must be a string with a length of 16');
-              }
-              return id;
-            },
-          })
           .group(['name', 'desc', 'deadline'], 'Task Options:')
           .option('name', {
             describe: 'Name of the task',
@@ -96,6 +85,17 @@ const arg = yargs(hideBin(process.argv))
     })
     .command('edit <id>', 'Edit a task', (yargs) => {
       yargs
+          .positional('id', {
+            describe: 'task\'s hash index',
+            type: 'string',
+            demandOption: true,
+            coerce: (id) => {
+              if (id.length !== 16) {
+                throw new Error('ID must be a string with a length of 16');
+              }
+              return id;
+            },
+          })
           .group(['name', 'desc', 'deadline'], 'Task Options:')
           .option('name', {
             describe: 'Name of the task',
@@ -127,10 +127,8 @@ const arg = yargs(hideBin(process.argv))
           });
     })
     .strict()
-    .demandCommand(1, 'You need at least one command before moving on')
+    .demandCommand(1, 'Please input a command')
     .help()
     .parse();
-
-console.log(arg);
 
 module.exports = arg;
