@@ -32,6 +32,9 @@ const arg = yargs(hideBin(process.argv))
             conflicts: ['due', 'overdue'],
           })
           .strictOptions();
+    }, function(arg) {
+      // TODO: run the function
+      console.log(arg);
     })
     .command('delete <id>', 'Delete task', (yargs) => {
       yargs.positional('id', {
