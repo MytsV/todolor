@@ -37,6 +37,19 @@ const arg = yargs(hideBin(process.argv))
         },
       });
     })
+    .command('complete <id>', 'Complete task', (yargs) => {
+      yargs.positional('id', {
+        describe: 'task\'s hash index',
+        type: 'string',
+        demandOption: true,
+        coerce: (id) => {
+          if (id.length !== 16) {
+            throw new Error('ID must be a string with a length of 10');
+          }
+          return id;
+        },
+      });
+    })
 //    .strict()
     .demandCommand(1, 'You need at least one command before moving on')
     .help()
