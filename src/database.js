@@ -10,6 +10,26 @@ const readContent = (path) => {
   return decode(result);
 };
 
+// Parses decoded database content into entities.
+const parse = (bytes) => {
+  if (bytes.length === 0) return {'entities': []};
+  /*
+   First two bytes represent ID counter, which is incremented on appending.
+   It is stored in big endian format as unsigned int16.
+   */
+  const lastIdx = bytes.readUInt16BE();
+  // All other information is just a UTF-8 string with JSON data.
+  const info = bytes.subarray(2).toString();
+  const entities = JSON.parse(info);
+  if (!Array.isArray(entities)) {
+    throw new SyntaxError();
+  }
+  return {
+    lastIdx,
+    'entities': entities,
+  };
+};
+
 /** Implementation of single-file entity{key-value} storage */
 class SimpleDatabase {
   /**
@@ -29,27 +49,29 @@ class SimpleDatabase {
    * @return {array}
    */
   getAll(type) {
-    readContent(path.join(this.dir, type));
-    return [];
+    const documentPath = path.join(this.dir, type);
+    const content = readContent(documentPath);
+    const data = parse(content);
+    return data.entities;
   }
 
   /**
    * Appends an entity of certain type
    * @param {string} type
-   * @param {Map} entity
+   * @param {object} entity
    */
   add(type, entity) {
     throw Error('Not implemented');
   }
 
   /**
-   * Appends an entity of certain type
+   * Changes values of an entity of certain type
    * @param {string} type
-   * @param {Map} entity
+   * @param {object} entity
    */
   edit(type, entity) {
     throw Error('Not implemented');
   }
 }
 
-module.exports = {SimpleDatabase};
+module.exports = {SimpleDatabase, parse};
