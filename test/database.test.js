@@ -121,6 +121,8 @@ const testEdit = (dir) => {
       // No ID - no idea what is edited
       {'hello': 'globe'},
       {'hello': mock, 'id': 0},
+      // There can't be an entity with such id
+      {'hello': 'world', 'id': 256},
     ];
     const db = new SimpleDatabase(dir);
     db.add(entryType, {'hello': 'world'});
