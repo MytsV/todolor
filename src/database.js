@@ -138,6 +138,23 @@ class SimpleDatabase {
   }
 
   /**
+   * Removes entity with {id} from database
+   * @param {string} type
+   * @param {string | number} id
+   */
+  delete(type, id) {
+    const data = this.#retrieveData(type);
+    const entityIdx = data.entities.findIndex((e) => e.id === id);
+    if (entityIdx < 0) {
+      throw Error('Can\'t find the entity to delete');
+    }
+    data.entities.splice(entityIdx, 1);
+
+    const documentPath = path.join(this.dir, type);
+    writeContent(documentPath, toBytes(data));
+  }
+
+  /**
    * A shorthand for reading and parsing database content
    * @param {string} type
    * @return {object}

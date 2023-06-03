@@ -155,6 +155,29 @@ const testEdit = (dir) => {
   });
 };
 
+const testDelete = (dir) => {
+  it('Fails if there is no such id', () => {
+    const db = new SimpleDatabase(dir);
+    expect(() => db.delete(entryType, 0)).to.throw();
+    db.add(entryType, {'hello': 'world'});
+    expect(() => db.delete(entryType, 1)).to.throw();
+  });
+
+  it('Successfully deletes entities', () => {
+    const db = new SimpleDatabase(dir);
+    const sampleEntity = {'hello': 'world'};
+    const caseCount = 5;
+    for (let i = 0; i < caseCount; i++) {
+      db.add(entryType, sampleEntity);
+    }
+    expect(db.getAll(entryType).length).to.equal(caseCount);
+    db.delete(entryType, 0);
+    // That's ID, not index, so the function shouldn't throw
+    expect(() => db.delete(entryType, caseCount - 1)).to.not.throw();
+    expect(db.getAll(entryType).length).to.equal(caseCount - 2);
+  });
+};
+
 const initMock = (dir) => {
   const fsConfig = {};
   fsConfig[dir] = {};
@@ -195,6 +218,12 @@ describe('SimpleDatabase', () => {
   describe('edit(type, entity)', () => {
     beforeEach(() => initMock(dir));
     testEdit(dir);
+    afterEach(restoreMock);
+  });
+
+  describe('delete(type, id)', () => {
+    beforeEach(() => initMock(dir));
+    testDelete(dir);
     afterEach(restoreMock);
   });
 });
