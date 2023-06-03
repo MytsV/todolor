@@ -5,16 +5,15 @@ const {SimpleDatabase} = require('../src/database');
 const {encode} = require('../src/cipher');
 
 const headerLength = 2;
+const entryType = 'test';
 
 const testGetAll = (dir) => {
   it('Returns an empty array if there are no entries yet', () => {
-    const entryType = 'test';
     const db = new SimpleDatabase(dir);
     expect(db.getAll(entryType)).to.deep.equal([]);
   });
 
   it('Throws error if file is corrupted', () => {
-    const entryType = 'test';
     fs.writeFileSync(`${dir}/${entryType}`, 'todolor');
     const db = new SimpleDatabase(dir);
     fs.writeFileSync(`${dir}/${entryType}`, encode(Buffer.from('todolor')));
@@ -42,7 +41,6 @@ const testGetAll = (dir) => {
       ],
     ];
 
-    const entryType = 'task';
     const db = new SimpleDatabase(dir);
 
     for (const testCase of cases) {
@@ -58,7 +56,6 @@ const testGetAll = (dir) => {
   });
 
   it('Fails if JSON data is incorrect', () => {
-    const entryType = 'test';
     const db = new SimpleDatabase(dir);
 
     const idBuffer = Buffer.alloc(headerLength);
@@ -78,7 +75,6 @@ const testAdd = (dir) => {
       {'hi': 'globe', 'number': 256},
     ];
 
-    const entryType = 'test';
     const db = new SimpleDatabase(dir);
     for (const testCase of cases) {
       db.add(entryType, testCase);
@@ -99,7 +95,6 @@ const testAdd = (dir) => {
       {'hi': 'globe', 'number': fs},
     ];
 
-    const entryType = 'test';
     const db = new SimpleDatabase(dir);
     for (const testCase of cases) {
       expect(() => db.add(entryType, testCase)).to.throw();
@@ -107,7 +102,6 @@ const testAdd = (dir) => {
   });
 
   it('Fails if ID count exceeds max value', () => {
-    const entryType = 'test';
     const db = new SimpleDatabase(dir);
 
     const idBuffer = Buffer.alloc(headerLength);
