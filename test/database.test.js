@@ -4,23 +4,7 @@ const fs = require('fs');
 const {SimpleDatabase} = require('../src/database');
 const {encode} = require('../src/cipher');
 
-describe('SimpleDatabase', () => {
-  const dir = '/test-db';
-
-  beforeEach(() => {
-    const fsConfig = {};
-    fsConfig[dir] = {};
-    mock(fsConfig);
-  });
-
-  it('Successfully opens database in an existing directory', () => {
-    expect(() => new SimpleDatabase(dir)).to.not.throw();
-  });
-
-  it('Fails on creation if database path is nonexistent', () => {
-    expect(() => new SimpleDatabase('/test-absent')).to.throw();
-  });
-
+const testGetAll = (dir) => {
   it('Returns an empty array if there are no entries yet', () => {
     const entryType = 'test';
     const db = new SimpleDatabase(dir);
@@ -36,6 +20,8 @@ describe('SimpleDatabase', () => {
   });
 
   const headerLength = 2;
+  // Set ID counter to zero for these tests
+  const defaultHeader = 0;
 
   it('Returns expected entries if file data is correct', () => {
     const cases = [
@@ -59,11 +45,11 @@ describe('SimpleDatabase', () => {
     const db = new SimpleDatabase(dir);
 
     for (const testCase of cases) {
-      // Database files have int16 (big endian) header, which denotes ID counter
-      const idxBuffer = Buffer.alloc(headerLength);
-      idxBuffer.writeUInt16BE(0);
+      // Database files have uint16 (big endian) header, denoting ID counter
+      const idBuffer = Buffer.alloc(headerLength);
+      idBuffer.writeUInt16BE(defaultHeader);
       const entityBuffer = Buffer.from(JSON.stringify(testCase));
-      const data = Buffer.concat([idxBuffer, entityBuffer]);
+      const data = Buffer.concat([idBuffer, entityBuffer]);
 
       fs.writeFileSync(`${dir}/${entryType}`, encode(data));
       expect(db.getAll(entryType)).to.deep.equal(testCase);
@@ -74,15 +60,43 @@ describe('SimpleDatabase', () => {
     const entryType = 'test';
     const db = new SimpleDatabase(dir);
 
-    const idxBuffer = Buffer.alloc(headerLength);
-    idxBuffer.writeUInt16BE(0);
+    const idBuffer = Buffer.alloc(headerLength);
+    idBuffer.writeUInt16BE(defaultHeader);
     const entityBuffer = Buffer.from('[{"hello:"world"}');
-    const data = Buffer.concat([idxBuffer, entityBuffer]);
+    const data = Buffer.concat([idBuffer, entityBuffer]);
     fs.writeFileSync(`${dir}/${entryType}`, encode(data));
     expect(() => db.getAll(entryType)).to.throw();
   });
+};
 
-  afterEach(() => {
-    mock.restore();
+const initMock = (dir) => {
+  const fsConfig = {};
+  fsConfig[dir] = {};
+  mock(fsConfig);
+};
+
+const restoreMock = () => mock.restore();
+
+describe('SimpleDatabase', () => {
+  const dir = '/test-db';
+
+  beforeEach(() => initMock(dir));
+
+  describe('new SimpleDatabase(dir)', () => {
+    beforeEach(() => initMock(dir));
+    it('Successfully opens database in an existing directory', () => {
+      expect(() => new SimpleDatabase(dir)).to.not.throw();
+    });
+
+    it('Fails on creation if database path is nonexistent', () => {
+      expect(() => new SimpleDatabase('/test-absent')).to.throw();
+    });
+    afterEach(restoreMock);
+  });
+
+  describe('getAll()', () => {
+    beforeEach(() => initMock(dir));
+    testGetAll(dir);
+    afterEach(restoreMock);
   });
 });
