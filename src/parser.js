@@ -1,7 +1,13 @@
-/* eslint-disable max-len */
 const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
 const moment = require('moment');
+
+const errorMsg = {
+  ID_LENGTH: 'ID must be a string with a length of 16',
+  DATE_FMT: 'Invalid date. Provide a date in YYYY-MM-DD HH:MM:SS format.',
+  OPTION_AMOUNT: 'At least one option is required',
+  EMPTY_REQ: 'Empty request. Please input a command',
+};
 
 const arg = yargs(hideBin(process.argv))
     .command('ls', 'Output the list of tasks', (yargs) => {
@@ -34,7 +40,7 @@ const arg = yargs(hideBin(process.argv))
         demandOption: true,
         coerce: (id) => {
           if (id.length !== 16) {
-            throw new Error('ID must be a string with a length of 16');
+            throw new Error(errorMsg.ID_LENGTH);
           }
           return id;
         },
@@ -47,7 +53,7 @@ const arg = yargs(hideBin(process.argv))
         demandOption: true,
         coerce: (id) => {
           if (id.length !== 16) {
-            throw new Error('ID must be a string with a length of 16');
+            throw new Error(errorMsg.ID_LENGTH);
           }
           return id;
         },
@@ -76,7 +82,7 @@ const arg = yargs(hideBin(process.argv))
             coerce: (deadline) => {
               const date = moment(deadline, 'YYYY-MM-DD HH:mm:ss', true);
               if (!date.isValid()) {
-                throw new Error('Invalid deadline. Please provide a date in YYYY-MM-DD HH:MM:SS format.');
+                throw new Error(errorMsg.DATE_FMT);
               }
               return date.format('YYYY-MM-DD HH:mm:ss');
             },
@@ -91,7 +97,7 @@ const arg = yargs(hideBin(process.argv))
             demandOption: true,
             coerce: (id) => {
               if (id.length !== 16) {
-                throw new Error('ID must be a string with a length of 16');
+                throw new Error(errorMsg.ID_LENGTH);
               }
               return id;
             },
@@ -114,20 +120,20 @@ const arg = yargs(hideBin(process.argv))
             coerce: (deadline) => {
               const date = moment(deadline, 'YYYY-MM-DD HH:mm:ss', true);
               if (!date.isValid()) {
-                throw new Error('Invalid deadline. Please provide a date in YYYY-MM-DD HH:MM:SS format.');
+                throw new Error(errorMsg.DATE_FMT);
               }
               return date.format('YYYY-MM-DD HH:mm:ss');
             },
           })
           .check((argv) => {
             if (!(argv.name || argv.desc || argv.deadline)) {
-              throw new Error('At least one option is required');
+              throw new Error(errorMsg.OPTION_AMOUNT);
             }
             return true;
           });
     })
     .strict()
-    .demandCommand(1, 'Please input a command')
+    .demandCommand(1, errorMsg.EMPTY_REQ)
     .help()
     .parse();
 
