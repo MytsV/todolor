@@ -1,6 +1,5 @@
 #!/bin/sh
 echo "executing post-commit"
-exit 0
 
 HAS_ISSUES=0
 
