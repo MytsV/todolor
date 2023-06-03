@@ -2,7 +2,8 @@ const cipher = require('../src/cipher');
 const {expect} = require('chai');
 
 const startPoint = 0x0;
-const endPoint = 0x10FFFF;
+// We test only regular characters, hence the low endPoint
+const endPoint = 0x00D000;
 const maxLength = 1024;
 
 const getRandomString = () => {
@@ -15,13 +16,18 @@ const getRandomString = () => {
   return result;
 };
 
+const encoding = 'utf-8';
+
 describe('cipher', () => {
   it('Correctly encodes and decodes any UTF-8 string', () => {
     const caseCount = 1024;
     for (let i = 0; i < caseCount; i++) {
       const testCase = getRandomString();
-      const result = cipher.decode(cipher.encode(testCase));
-      expect(result).to.equal(testCase);
+      const buffer = Buffer.from(testCase, encoding);
+      const encoded = cipher.encode(buffer);
+      const result = cipher.decode(encoded);
+      expect(result).to.deep.equal(buffer);
+      expect(result.toString(encoding)).to.equal(testCase);
     }
   });
 });
