@@ -1,3 +1,5 @@
+#!/bin/sh
+
 HAS_ISSUES=0
 
 for file in $(git diff --name-only --staged); do
