@@ -126,7 +126,7 @@ const arg = yargs(hideBin(process.argv))
             return true;
           });
     })
-//    .strict()
+    .strict()
     .demandCommand(1, 'You need at least one command before moving on')
     .help()
     .parse();
