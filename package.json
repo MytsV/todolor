@@ -13,5 +13,8 @@
     "eslint": "^8.41.0",
     "eslint-config-google": "^0.14.0",
     "mocha": "^10.2.0"
+  },
+  "dependencies": {
+    "moment": "^2.29.4"
   }
 }
