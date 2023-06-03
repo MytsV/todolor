@@ -115,6 +115,40 @@ const testAdd = (dir) => {
   });
 };
 
+const testEdit = (dir) => {
+  it('Fails if an entity is incorrect', () => {
+    const cases = [
+      // No ID - no idea what is edited
+      {'hello': 'globe'},
+      {'hello': mock, 'id': 0},
+    ];
+    const db = new SimpleDatabase(dir);
+    db.add(entryType, {'hello': 'world'});
+    for (const testCase of cases) {
+      expect(() => db.edit(entryType, testCase)).to.throw();
+    }
+  });
+
+  it('Successfully both adds and edits key-values pairs', () => {
+    const db = new SimpleDatabase(dir);
+    const toEdit = {'hello': 'world', 'touch': 'me'};
+    const id = 0;
+    db.add(entryType, toEdit);
+    db.edit(entryType, {'touch': 'forbidden', 'new': 'value', 'id': id});
+    const edited = db.getAll(entryType)[id];
+    expect(edited).to.deep.equal({
+      // Old values don't vanish
+      'hello': 'world',
+      // The needed ones are updated
+      'touch': 'forbidden',
+      // New ones are added
+      'new': 'value',
+      // Index stays the same
+      'id': id,
+    });
+  });
+};
+
 const initMock = (dir) => {
   const fsConfig = {};
   fsConfig[dir] = {};
@@ -149,6 +183,12 @@ describe('SimpleDatabase', () => {
   describe('add(type, entity)', () => {
     beforeEach(() => initMock(dir));
     testAdd(dir);
+    afterEach(restoreMock);
+  });
+
+  describe('edit(type, entity)', () => {
+    beforeEach(() => initMock(dir));
+    testEdit(dir);
     afterEach(restoreMock);
   });
 });

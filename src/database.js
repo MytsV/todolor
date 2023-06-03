@@ -81,9 +81,7 @@ class SimpleDatabase {
    * @return {array}
    */
   getAll(type) {
-    const documentPath = path.join(this.dir, type);
-    const content = readContent(documentPath);
-    const data = parse(content);
+    const data = this.#retrieveData(type);
     return data.entities;
   }
 
@@ -96,9 +94,7 @@ class SimpleDatabase {
     if (!isEntityCorrect(entity)) {
       throw Error('Entity terminal values may be only strings or numbers');
     }
-    const documentPath = path.join(this.dir, type);
-    const content = readContent(documentPath);
-    const data = parse(content);
+    const data = this.#retrieveData(type);
     if (data.lastIdx === idMax) {
       // TODO: reindexing operation to restore overflown database
       throw Error('ID counter overflow');
@@ -107,6 +103,8 @@ class SimpleDatabase {
     const entityClone = Object.assign({}, entity);
     entityClone['id'] = data.lastIdx;
     data.entities.push(entityClone);
+
+    const documentPath = path.join(this.dir, type);
     writeContent(documentPath, toBytes(data));
   }
 
@@ -116,7 +114,32 @@ class SimpleDatabase {
    * @param {object} entity
    */
   edit(type, entity) {
-    throw Error('Not implemented');
+    if (entity.id === undefined) {
+      throw Error('Entity must have ID specified');
+    }
+    if (!isEntityCorrect(entity)) {
+      throw Error('Entity terminal values may be only strings or numbers');
+    }
+    const data = this.#retrieveData(type);
+    const editedEntity = data.entities.find((e) => e.id === entity.id);
+    if (!editedEntity) {
+      throw Error('Can\'t find the entity to edit');
+    }
+    Object.assign(editedEntity, entity);
+
+    const documentPath = path.join(this.dir, type);
+    writeContent(documentPath, toBytes(data));
+  }
+
+  /**
+   * A shorthand for reading and parsing database content
+   * @param {string} type
+   * @return {object}
+  */
+  #retrieveData(type) {
+    const documentPath = path.join(this.dir, type);
+    const content = readContent(documentPath);
+    return parse(content);
   }
 }
 
