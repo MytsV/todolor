@@ -111,49 +111,51 @@ const setAdd = () => {
   });
 };
 
-parser
-    .command('edit <id>', 'Edit a task', (yargs) => {
-      yargs
-          .positional('id', {
-            describe: 'task\'s hash index',
-            type: 'string',
-            demandOption: true,
-            coerce: (id) => idCheck(id),
-          })
-          .group(['name', 'desc', 'deadline'], 'Task Options:')
-          .option('name', {
-            describe: 'Name of the task',
-            alias: 'n',
-            type: 'string',
-          })
-          .option('desc', {
-            describe: 'Description of the task',
-            alias: 'd',
-            type: 'string',
-          })
-          .option('deadline', {
-            describe: 'Task\'s deadline',
-            alias: 'l',
-            type: 'date',
-            coerce: (deadline) => checkDate(deadline),
-          })
-          .check((argv) => {
-            if (!(argv.name || argv.desc || argv.deadline)) {
-              throw new Error(optionCount);
-            }
-            return true;
-          });
-    })
-    .strict()
-    .demandCommand(1, emptyReq)
-    .help()
-    .parse();
+const setEdit = () => {
+  parser.command('edit <id>', 'Edit a task', (yargs) => {
+    yargs.positional('id', {
+      describe: 'task\'s hash index',
+      type: 'string',
+      demandOption: true,
+      coerce: (id) => idCheck(id),
+    });
+
+    yargs.group(['name', 'desc', 'deadline'], 'Task Options:');
+
+    yargs.option('name', {
+      describe: 'Name of the task',
+      alias: 'n',
+      type: 'string',
+    });
+
+    yargs.option('desc', {
+      describe: 'Description of the task',
+      alias: 'd',
+      type: 'string',
+    });
+
+    yargs.option('deadline', {
+      describe: 'Task\'s deadline',
+      alias: 'l',
+      type: 'date',
+      coerce: (deadline) => checkDate(deadline),
+    });
+
+    yargs.check((argv) => {
+      if (!(argv.name || argv.desc || argv.deadline)) {
+        throw new Error(optionCount);
+      }
+      return true;
+    });
+  });
+};
 
 const parse = () => {
   setLs();
   setComplete();
   setDelete();
   setAdd();
+  setEdit();
 
   parser.strict();
   parser.demandCommand(1, emptyReq);
