@@ -15,6 +15,7 @@ const idCheck = (id) => {
   if (isNaN(id) || id <= 0 || id >= idMax) {
     throw new Error(idLength);
   }
+
   return id;
 };
 
@@ -27,41 +28,46 @@ const checkDate = (deadline) => {
   return date.format(dateFmt);
 };
 
-const arg = yargs(hideBin(process.argv))
-    .command('ls', 'Output the list of tasks', (yargs) => {
-      yargs
-          .group(['due', 'overdue', 'completed'], 'Filter Options:')
-          .option('due', {
-            describe: 'Filter tasks to show only pending tasks',
-            alias: 'd',
-            type: 'boolean',
-            conflicts: ['overdue', 'completed'],
-          })
-          .option('overdue', {
-            describe: 'Filter tasks to show only overdue tasks',
-            alias: 'o',
-            type: 'boolean',
-            conflicts: ['due', 'completed'],
-          })
-          .option('completed', {
-            describe: 'Filter tasks to show only completed tasks',
-            alias: 'c',
-            type: 'boolean',
-            conflicts: ['due', 'overdue'],
-          })
-          .strictOptions();
-    }, function(arg) {
-      // TODO: run the function
-      console.log(arg);
-    })
-    .command('delete <id>', 'Delete task', (yargs) => {
-      yargs.positional('id', {
-        describe: 'task\'s ID',
-        type: 'string',
-        demandOption: true,
-        coerce: (id) => idCheck(id),
-      });
-    })
+const parser = yargs(hideBin(process.argv));
+
+const setLs = () => {
+  parser.command('ls', 'Output the list of tasks', (yargs) => {
+    yargs.group(['due', 'overdue', 'completed'], 'Filter Options:');
+
+    yargs.option('due', {
+      describe: 'Filter tasks to show only pending tasks',
+      alias: 'd',
+      type: 'boolean',
+      conflicts: ['overdue', 'completed'],
+    });
+
+    yargs.option('overdue', {
+      describe: 'Filter tasks to show only overdue tasks',
+      alias: 'o',
+      type: 'boolean',
+      conflicts: ['due', 'completed'],
+    });
+
+    yargs.option('completed', {
+      describe: 'Filter tasks to show only completed tasks',
+      alias: 'c',
+      type: 'boolean',
+      conflicts: ['due', 'overdue'],
+    });
+
+    yargs.strictOptions();
+  });
+};
+
+
+parser.command('delete <id>', 'Delete task', (yargs) => {
+  yargs.positional('id', {
+    describe: 'task\'s ID',
+    type: 'string',
+    demandOption: true,
+    coerce: (id) => idCheck(id),
+  });
+})
     .command('complete <id>', 'Complete task', (yargs) => {
       yargs.positional('id', {
         describe: 'task\'s ID',
@@ -131,4 +137,14 @@ const arg = yargs(hideBin(process.argv))
     .help()
     .parse();
 
-module.exports = arg;
+const parse = () => {
+  setLs();
+
+  parser.strict();
+  parser.demandCommand(1, emptyReq);
+  parser.help();
+
+  return parser.parse();
+};
+
+module.exports = {parse};
