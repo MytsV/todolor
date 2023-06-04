@@ -6,10 +6,17 @@ const dateFmt = 'YYYY-MM-DD HH:MM:SS';
 
 const idMax = 65536;
 
-const idLength = `ID must be in the range from 0 to ${idMax}`;
+const idLength = `ID must be a number in the range from 0 to ${idMax}`;
 const invalidDateFmt = `Invalid date. Provide a date in the ${dateFmt} format.`;
 const optionCount = 'At least one option is required';
 const emptyReq = 'Empty request. Please input a command';
+
+const idCheck = (id) => {
+  if (isNaN(id) || id <= 0 || id >= idMax) {
+    throw new Error(idLength);
+  }
+  return id;
+};
 
 const arg = yargs(hideBin(process.argv))
     .command('ls', 'Output the list of tasks', (yargs) => {
@@ -43,25 +50,15 @@ const arg = yargs(hideBin(process.argv))
         describe: 'task\'s ID',
         type: 'string',
         demandOption: true,
-        coerce: (id) => {
-          if (id.length !== 16) {
-            throw new Error(idLength);
-          }
-          return id;
-        },
+        coerce: (id) => idCheck(id),
       });
     })
     .command('complete <id>', 'Complete task', (yargs) => {
       yargs.positional('id', {
         describe: 'task\'s ID',
-        type: 'string',
+        type: 'number',
         demandOption: true,
-        coerce: (id) => {
-          if (id.length !== 16) {
-            throw new Error(idLength);
-          }
-          return id;
-        },
+        coerce: (id) => idCheck(id),
       });
     })
     .command('add', 'Add new task', (yargs) => {
@@ -100,12 +97,7 @@ const arg = yargs(hideBin(process.argv))
             describe: 'task\'s hash index',
             type: 'string',
             demandOption: true,
-            coerce: (id) => {
-              if (id.length !== 16) {
-                throw new Error(errorMsg.ID_LENGTH);
-              }
-              return id;
-            },
+            coerce: (id) => idCheck(id),
           })
           .group(['name', 'desc', 'deadline'], 'Task Options:')
           .option('name', {
