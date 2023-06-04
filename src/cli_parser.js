@@ -81,31 +81,37 @@ const setDelete = () => {
   });
 };
 
+const setAdd = () => {
+  parser.command('add', 'Add new task', (yargs) => {
+    yargs.group(['name', 'desc', 'deadline'], 'Task Options:');
+
+    yargs.option('name', {
+      describe: 'Name of the task',
+      alias: 'n',
+      type: 'string',
+      demandOption: true,
+    });
+
+    yargs.option('desc', {
+      describe: 'Description of the task',
+      alias: 'd',
+      type: 'string',
+      demandOption: true,
+    });
+
+    yargs.option('deadline', {
+      describe: 'Task\'s deadline',
+      alias: 'l',
+      type: 'data',
+      demandOption: true,
+      coerce: (deadline) => checkDate(deadline),
+    });
+
+    yargs.strictOptions();
+  });
+};
+
 parser
-    .command('add', 'Add new task', (yargs) => {
-      yargs
-          .group(['name', 'desc', 'deadline'], 'Task Options:')
-          .option('name', {
-            describe: 'Name of the task',
-            alias: 'n',
-            type: 'string',
-            demandOption: true,
-          })
-          .option('desc', {
-            describe: 'Description of the task',
-            alias: 'd',
-            type: 'string',
-            demandOption: true,
-          })
-          .option('deadline', {
-            describe: 'Task\'s deadline',
-            alias: 'l',
-            type: 'data',
-            demandOption: true,
-            coerce: (deadline) => checkDate(deadline),
-          })
-          .strictOptions();
-    })
     .command('edit <id>', 'Edit a task', (yargs) => {
       yargs
           .positional('id', {
@@ -147,6 +153,7 @@ const parse = () => {
   setLs();
   setComplete();
   setDelete();
+  setAdd();
 
   parser.strict();
   parser.demandCommand(1, emptyReq);
