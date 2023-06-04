@@ -170,6 +170,4 @@ const parse = () => {
   return parser.parse();
 };
 
-console.log(parse());
-
 module.exports = {parse};
