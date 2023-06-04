@@ -59,6 +59,16 @@ const setLs = () => {
   });
 };
 
+const setComplete = () => {
+  parser.command('complete <id>', 'Complete task', (yargs) => {
+    yargs.positional('id', {
+      describe: 'task\'s ID',
+      type: 'number',
+      demandOption: true,
+      coerce: (id) => idCheck(id),
+    });
+  });
+};
 
 parser.command('delete <id>', 'Delete task', (yargs) => {
   yargs.positional('id', {
@@ -68,14 +78,6 @@ parser.command('delete <id>', 'Delete task', (yargs) => {
     coerce: (id) => idCheck(id),
   });
 })
-    .command('complete <id>', 'Complete task', (yargs) => {
-      yargs.positional('id', {
-        describe: 'task\'s ID',
-        type: 'number',
-        demandOption: true,
-        coerce: (id) => idCheck(id),
-      });
-    })
     .command('add', 'Add new task', (yargs) => {
       yargs
           .group(['name', 'desc', 'deadline'], 'Task Options:')
@@ -139,6 +141,7 @@ parser.command('delete <id>', 'Delete task', (yargs) => {
 
 const parse = () => {
   setLs();
+  setComplete();
 
   parser.strict();
   parser.demandCommand(1, emptyReq);
