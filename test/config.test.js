@@ -4,6 +4,7 @@ const {expect} = require('chai');
 
 const os = require('os');
 const fs = require('fs');
+const path = require('path');
 const {read: readConfig} = require('../src/config');
 
 const unreadable = 0o000;
@@ -24,7 +25,7 @@ describe('readConfig()', () => {
     mock(fsConfig);
 
     const result = readConfig();
-    expect(result.path).to.equal(dbPath);
+    expect(result.path).to.equal(path.normalize(dbPath));
   });
 
   it('Creates a new configuration file if one is absent', () => {
