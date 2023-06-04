@@ -4,6 +4,7 @@ const {expect} = require('chai');
 
 const os = require('os');
 const fs = require('fs');
+const path = require('path');
 const {read: readConfig} = require('../src/config');
 
 const unreadable = 0o000;
@@ -33,7 +34,7 @@ describe('readConfig()', () => {
     mock(fsConfig);
 
     const result = readConfig();
-    expect(result.path).to.equal(`${homedir}/.todolor`);
+    expect(result.path).to.equal(path.normalize(`${homedir}/.todolor`));
     expect(fs.existsSync(`${homedir}/.todolor.conf`)).to.be.true;
   });
 
