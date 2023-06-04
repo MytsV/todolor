@@ -12,7 +12,7 @@ const optionCount = 'At least one option is required';
 const emptyReq = 'Empty request. Please input a command';
 
 const idCheck = (id) => {
-  if (isNaN(id) || id <= 0 || id >= idMax) {
+  if (isNaN(id) || id < 0 || id > idMax) {
     throw new Error(idLength);
   }
 
@@ -64,7 +64,6 @@ const setComplete = () => {
     yargs.positional('id', {
       describe: 'task\'s ID',
       type: 'number',
-      demandOption: true,
       coerce: (id) => idCheck(id),
     });
   });
@@ -74,9 +73,8 @@ const setDelete = () => {
   parser.command('delete <id>', 'Delete task', (yargs) => {
     yargs.positional('id', {
       describe: 'task\'s ID',
-      type: 'string',
-      demandOption: true,
-      coerce: (id) => idCheck(id),
+      type: 'number',
+      coerce: idCheck,
     });
   });
 };
@@ -96,15 +94,12 @@ const setAdd = () => {
       describe: 'Description of the task',
       alias: 'd',
       type: 'string',
-      demandOption: true,
     });
 
     yargs.option('deadline', {
       describe: 'Task\'s deadline',
       alias: 'l',
-      type: 'data',
-      demandOption: true,
-      coerce: (deadline) => checkDate(deadline),
+      coerce: checkDate,
     });
 
     yargs.strictOptions();
@@ -115,9 +110,8 @@ const setEdit = () => {
   parser.command('edit <id>', 'Edit a task', (yargs) => {
     yargs.positional('id', {
       describe: 'task\'s hash index',
-      type: 'string',
-      demandOption: true,
-      coerce: (id) => idCheck(id),
+      type: 'number',
+      coerce: idCheck,
     });
 
     yargs.group(['name', 'desc', 'deadline'], 'Task Options:');
@@ -137,12 +131,11 @@ const setEdit = () => {
     yargs.option('deadline', {
       describe: 'Task\'s deadline',
       alias: 'l',
-      type: 'date',
-      coerce: (deadline) => checkDate(deadline),
+      coerce: checkDate,
     });
 
-    yargs.check((argv) => {
-      if (!(argv.name || argv.desc || argv.deadline)) {
+    yargs.check((parser) => {
+      if (!(parser.name || parser.desc || parser.deadline)) {
         throw new Error(optionCount);
       }
       return true;
