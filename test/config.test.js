@@ -25,7 +25,7 @@ describe('readConfig()', () => {
     mock(fsConfig);
 
     const result = readConfig();
-    expect(result.path).to.equal(path.normalize(dbPath));
+    expect(result.path).to.equal(dbPath);
   });
 
   it('Creates a new configuration file if one is absent', () => {
@@ -34,7 +34,7 @@ describe('readConfig()', () => {
     mock(fsConfig);
 
     const result = readConfig();
-    expect(result.path).to.equal(`${homedir}/.todolor`);
+    expect(result.path).to.equal(path.normalize(`${homedir}/.todolor`));
     expect(fs.existsSync(`${homedir}/.todolor.conf`)).to.be.true;
   });
 
