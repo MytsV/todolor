@@ -9,8 +9,9 @@ const toBytes = (data) => {
   const idBuffer = Buffer.alloc(idSize);
   idBuffer.writeUInt16BE(data.lastIdx);
   // Write json string with default UTF-8 encoding
-  const jsonBuffer = Buffer.from(JSON.stringify(data.entities));
-  return Buffer.concat([idBuffer, jsonBuffer]);
+  const dataJson = JSON.stringify(data.entities);
+  const dataBuffer = Buffer.from(dataJson);
+  return Buffer.concat([idBuffer, dataBuffer]);
 };
 
 // Parses decoded database content into entities.

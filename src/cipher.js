@@ -13,12 +13,7 @@ const rotate = (bytes, mul = 1) => {
   return result;
 };
 
-const encode = (bytes) => {
-  return rotate(bytes);
-};
-
-const decode = (bytes) => {
-  return rotate(bytes, -1);
-};
+const encode = (bytes) => rotate(bytes);
+const decode = (bytes) => rotate(bytes, -1);
 
 module.exports = {encode, decode};
