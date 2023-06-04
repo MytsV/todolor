@@ -1,5 +1,7 @@
 const type = 'task';
 
+const retrieveTasks = (db) => db.getAll(type).map((e) => toTask(e));
+
 /** A mediator between database and user interface */
 class TaskController {
   /**
@@ -15,7 +17,7 @@ class TaskController {
    * @return {array}
    */
   getAll() {
-    return this.db.getAll(type).map((e) => toTask(e));
+    return retrieveTasks(this.db);
   }
 
   /**
@@ -23,7 +25,7 @@ class TaskController {
    * @return {array}
    */
   getDue() {
-    const tasks = this.db.getAll(type).map((e) => toTask(e));
+    const tasks = retrieveTasks(this.db);
     const due = tasks.filter((e) => e.completed === undefined);
     sortByDate(due);
     return due;
@@ -78,7 +80,7 @@ class TaskController {
    * @return {array}
    */
   getOverdue() {
-    const tasks = this.db.getAll(type).map((e) => toTask(e));
+    const tasks = retrieveTasks(this.db);
     const now = new Date().getTime();
     const overdue = tasks.filter((e) => {
       return e.completed === undefined &&
@@ -102,52 +104,53 @@ class TaskController {
    * @return {array}
    */
   getCompleted() {
-    const tasks = this.db.getAll(type).map((e) => toTask(e));
+    const tasks = retrieveTasks(this.db);
     const res = tasks.filter((e) => e.completed !== undefined);
     sortByDate(res, 'completed', -1);
     return res;
   }
 }
 
-const taskKeys = ['id', 'title', 'description', 'deadline', 'completed'];
-
-const toEntity = (task) => {
-  if (!task.title) {
-    throw Error('Task should contain a title');
-  }
-  const entity = {};
-  for (const key in task) {
-    if (!taskKeys.includes(key)) continue;
-    entity[key] = task[key];
-  }
-  return entity;
-};
-
 const sortByDate = (tasks, key = 'deadline', order = 1) => {
+  if (order !== 1 && order !== -1) throw Error('Invalid order');
   tasks.sort((a, b) => {
     // Check in undefined, because what if we want to set deadline to 1970? :)
-    if (a[key] === undefined) {
-      if (b[key] === undefined) return 0;
+    if (a[key] === undefined && b[key] === undefined) {
+      return 0;
+    } else if (a[key] === undefined) {
       return order;
     } else if (b[key] === undefined) {
       return -order;
     }
-    if (a[key] < b[key]) return -order;
-    else if (a[key] !== b[key]) return order;
-    return 0;
+
+    if (a[key] === b[key]) return 0;
+    else return a[key] < b[key] ? -order : order;
   });
+};
+
+const taskKeys = ['id', 'title', 'description', 'deadline', 'completed'];
+
+const copyValidKeys = (obj) => {
+  const clone = {};
+  for (const key in obj) {
+    if (!taskKeys.includes(key)) continue;
+    clone[key] = obj[key];
+  }
+  return clone;
 };
 
 const toTask = (entity) => {
   if (entity.id === undefined || !entity.title) {
     throw Error('A task entry is corrupted');
   }
-  const task = {};
-  for (const key in entity) {
-    if (!taskKeys.includes(key)) continue;
-    task[key] = entity[key];
+  return copyValidKeys(entity);
+};
+
+const toEntity = (task) => {
+  if (!task.title) {
+    throw Error('Task should contain a title');
   }
-  return task;
+  return copyValidKeys(task);
 };
 
 module.exports = TaskController;
