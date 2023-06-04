@@ -25,18 +25,7 @@ class TaskController {
   getDue() {
     const tasks = this.db.getAll(type).map((e) => toTask(e));
     const due = tasks.filter((e) => e.complete === undefined);
-    due.sort((a, b) => {
-      // Check in undefined, because what if we want to set deadline to 1970? :)
-      if (a.deadline === undefined) {
-        if (b.deadline === undefined) return 0;
-        return 1;
-      } else if (b.deadline === undefined) {
-        return -1;
-      }
-      if (a.deadline < b.deadline) return -1;
-      else if (a.deadline !== b.deadline) return 1;
-      return 0;
-    });
+    sortByDate(due);
     return due;
   }
 
@@ -57,22 +46,101 @@ class TaskController {
     const changes = {'id': task.id, 'complete': now.getTime()};
     return this.db.edit(type, changes);
   }
+
+  /**
+   * Appends a task to database and returns new task ID
+   * @param {object} task
+   * @return {string | number}
+   */
+  add(task) {
+    const entity = toEntity(task);
+    if (entity.complete !== undefined) {
+      throw Error('Cannot add an already completed task');
+    }
+    return this.db.add(type, entity);
+  }
+
+  /**
+   * Edits a task's content, but not completion status
+   * @param {object} changes
+   * @return {string | number}
+   */
+  edit(changes) {
+    const entity = toEntity(changes);
+    if (entity.complete !== undefined) {
+      throw Error('Cannot edit completion time or status');
+    }
+    return this.db.edit(type, entity);
+  }
+
+  /**
+   * Retrieves all undone tasks with missed deadlines and sorts them
+   * @return {array}
+   */
+  getOverdue() {
+    const tasks = this.db.getAll(type).map((e) => toTask(e));
+    const now = new Date().getTime();
+    const overdue = tasks.filter((e) => {
+      return e.complete === undefined &&
+        e.deadline !== undefined &&
+        e.deadline < now;
+    });
+    sortByDate(overdue);
+    return overdue;
+  }
+
+  /**
+   * Deletes a task with specified ID
+   * @param {string | number} id
+   */
+  delete(id) {
+    this.db.delete(type, id);
+  }
+
+  /**
+   * Retrieves all completed tasks in order of their completion
+   * @return {array}
+   */
+  getCompleted() {
+    const tasks = this.db.getAll(type).map((e) => toTask(e));
+    const res = tasks.filter((e) => e.complete !== undefined);
+    sortByDate(res, 'complete', -1);
+    return res;
+  }
 }
 
 const taskKeys = ['id', 'title', 'description', 'deadline', 'complete'];
 
-// const toEntity = (task) => {
-//   const entity = {};
-//   for (const key in task) {
-//     if (!taskKeys.includes(key)) continue;
-//     entity[key] = task[key];
-//   }
-//   return entity;
-// };
+const toEntity = (task) => {
+  if (!task.title) {
+    throw Error('Task should contain a title');
+  }
+  const entity = {};
+  for (const key in task) {
+    if (!taskKeys.includes(key)) continue;
+    entity[key] = task[key];
+  }
+  return entity;
+};
+
+const sortByDate = (tasks, key = 'deadline', order = 1) => {
+  tasks.sort((a, b) => {
+    // Check in undefined, because what if we want to set deadline to 1970? :)
+    if (a[key] === undefined) {
+      if (b[key] === undefined) return 0;
+      return order;
+    } else if (b[key] === undefined) {
+      return -order;
+    }
+    if (a[key] < b[key]) return -order;
+    else if (a[key] !== b[key]) return order;
+    return 0;
+  });
+};
 
 const toTask = (entity) => {
-  if (entity['id'] === undefined || !entity['title']) {
-    throw Error('Some task entry is corrupted');
+  if (entity.id === undefined || !entity.title) {
+    throw Error('A task entry is corrupted');
   }
   const task = {};
   for (const key in entity) {

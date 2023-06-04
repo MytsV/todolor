@@ -23,7 +23,7 @@ class MockDatabase {
     clone.id = this.idCounter;
     this.idCounter++;
     this.tasks.push(clone);
-    return this.idCounter;
+    return clone.id;
   }
 
   edit(type, entity) {
@@ -128,6 +128,115 @@ describe('TaskController', () => {
       const db = new MockDatabase();
       const controller = new TaskController(db);
       expect(() => controller.complete(0)).to.throw();
+    });
+  });
+
+  describe('add(task)', () => {
+    it('Successfully adds new tasks, excluding redundant fields', () => {
+      const db = new MockDatabase();
+      const controller = new TaskController(db);
+      controller.add({'title': 'hello'});
+      controller.add({'title': 'hi', 'remove': 'me'});
+      expect(controller.getAll()).to.deep.equal([
+        {'title': 'hello', 'id': 0},
+        {'title': 'hi', 'id': 1},
+      ]);
+    });
+
+    it('Fails if task data is incorrect', () => {
+      const db = new MockDatabase();
+      const controller = new TaskController(db);
+      let task = {'hello': 'world'};
+      expect(() => controller.add(task)).to.throw();
+      task = {'title': 'hi', 'complete': new Date().getTime()};
+      expect(() => controller.add(task)).to.throw();
+    });
+  });
+
+  describe('edit(changes)', () => {
+    it('Successfully edits a task', () => {
+      const db = new MockDatabase();
+      const controller = new TaskController(db);
+      controller.add({'title': 'hello'});
+      controller.edit({'title': 'hi', 'description': '!', 'id': 0});
+      expect(controller.getAll()).to.deep.equal([
+        {'title': 'hi', 'description': '!', 'id': 0},
+      ]);
+    });
+
+    it('Fails if completion date is specified or if ID is wrong', () => {
+      const db = new MockDatabase();
+      const controller = new TaskController(db);
+      controller.add({'title': 'hello'});
+      let changes = {'complete': new Date().getTime(), 'id': 0};
+      expect(() => controller.edit(changes)).to.throw();
+      changes = {'id': 1, 'title': 'hi'};
+      expect(() => controller.edit(changes)).to.throw();
+    });
+  });
+
+  describe('getOverdue()', () => {
+    it('Retrieves only overdue tasks and sorts them', () => {
+      const db = new MockDatabase();
+      const controller = new TaskController(db);
+      const muchTime = 5000;
+      const overdueFirst = new Date().getTime() - muchTime * 2;
+      const overdueSecond = new Date().getTime() - muchTime;
+      const due = new Date().getTime() + muchTime;
+      const entities = [
+        {'title': 'hello', 'complete': due, 'deadline': overdueFirst},
+        {'title': 'hi', 'deadline': overdueFirst},
+        {'title': 'привіт!', 'description': 'dolor...'},
+        {'title': 'hi', 'deadline': due},
+        {'title': 'hello', 'deadline': overdueSecond},
+        {'title': 'привіт', 'deadline': overdueFirst},
+      ];
+      for (const entity of entities) {
+        db.add(entityType, entity);
+      }
+      // Set IDs, so we don't have to add them later
+      entities.forEach((e, idx) => e.id = idx);
+      expect(controller.getOverdue()).to.deep.equal([
+        entities[1],
+        entities[5],
+        entities[4],
+      ]);
+    });
+  });
+
+  describe('delete(id)', () => {
+    it('Deletes an existing task', () => {
+      const db = new MockDatabase();
+      const controller = new TaskController(db);
+      const id = controller.add({'title': 'hello'});
+      expect(controller.getAll().length).to.equal(1);
+      controller.delete(id);
+      expect(controller.getAll().length).to.equal(0);
+    });
+  });
+
+  describe('getCompleted()', () => {
+    it('Retrieves only completed tasks and sorts them', () => {
+      const db = new MockDatabase();
+      const controller = new TaskController(db);
+      const timestamp = new Date().getTime();
+      const entities = [
+        {'title': 'hello', 'complete': timestamp},
+        {'title': 'hi', 'deadline': timestamp},
+        {'title': 'привіт!', 'description': 'dolor...'},
+        {'title': 'hi', 'complete': timestamp + 1},
+        {'title': 'hello', 'complete': timestamp},
+      ];
+      for (const entity of entities) {
+        db.add(entityType, entity);
+      }
+      // Set IDs, so we don't have to add them later
+      entities.forEach((e, idx) => e.id = idx);
+      expect(controller.getCompleted()).to.deep.equal([
+        entities[3],
+        entities[0],
+        entities[4],
+      ]);
     });
   });
 });
