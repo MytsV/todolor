@@ -70,14 +70,18 @@ const setComplete = () => {
   });
 };
 
-parser.command('delete <id>', 'Delete task', (yargs) => {
-  yargs.positional('id', {
-    describe: 'task\'s ID',
-    type: 'string',
-    demandOption: true,
-    coerce: (id) => idCheck(id),
+const setDelete = () => {
+  parser.command('delete <id>', 'Delete task', (yargs) => {
+    yargs.positional('id', {
+      describe: 'task\'s ID',
+      type: 'string',
+      demandOption: true,
+      coerce: (id) => idCheck(id),
+    });
   });
-})
+};
+
+parser
     .command('add', 'Add new task', (yargs) => {
       yargs
           .group(['name', 'desc', 'deadline'], 'Task Options:')
@@ -142,6 +146,7 @@ parser.command('delete <id>', 'Delete task', (yargs) => {
 const parse = () => {
   setLs();
   setComplete();
+  setDelete();
 
   parser.strict();
   parser.demandCommand(1, emptyReq);
