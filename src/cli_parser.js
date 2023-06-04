@@ -2,12 +2,14 @@ const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
 const moment = require('moment');
 
-const errorMsg = {
-  ID_LENGTH: 'ID must be a string with a length of 16',
-  DATE_FMT: 'Invalid date. Provide a date in YYYY-MM-DD HH:MM:SS format.',
-  OPTION_AMOUNT: 'At least one option is required',
-  EMPTY_REQ: 'Empty request. Please input a command',
-};
+const dateFmt = 'YYYY-MM-DD HH:MM:SS';
+
+const idMax = 65536;
+
+const idLength = `ID must be in the range from 0 to ${idMax}`;
+const invalidDateFmt = `Invalid date. Provide a date in the ${dateFmt} format.`;
+const optionCount = 'At least one option is required';
+const emptyReq = 'Empty request. Please input a command';
 
 const arg = yargs(hideBin(process.argv))
     .command('ls', 'Output the list of tasks', (yargs) => {
@@ -43,7 +45,7 @@ const arg = yargs(hideBin(process.argv))
         demandOption: true,
         coerce: (id) => {
           if (id.length !== 16) {
-            throw new Error(errorMsg.ID_LENGTH);
+            throw new Error(idLength);
           }
           return id;
         },
@@ -56,7 +58,7 @@ const arg = yargs(hideBin(process.argv))
         demandOption: true,
         coerce: (id) => {
           if (id.length !== 16) {
-            throw new Error(errorMsg.ID_LENGTH);
+            throw new Error(idLength);
           }
           return id;
         },
@@ -83,11 +85,11 @@ const arg = yargs(hideBin(process.argv))
             type: 'data',
             demandOption: true,
             coerce: (deadline) => {
-              const date = moment(deadline, 'YYYY-MM-DD HH:mm:ss', true);
+              const date = moment(deadline, dateFmt, true);
               if (!date.isValid()) {
-                throw new Error(errorMsg.DATE_FMT);
+                throw new Error(invalidDateFmt);
               }
-              return date.format('YYYY-MM-DD HH:mm:ss');
+              return date.format(dateFmt);
             },
           })
           .strictOptions();
@@ -121,22 +123,22 @@ const arg = yargs(hideBin(process.argv))
             alias: 'l',
             type: 'date',
             coerce: (deadline) => {
-              const date = moment(deadline, 'YYYY-MM-DD HH:mm:ss', true);
+              const date = moment(deadline, dateFmt, true);
               if (!date.isValid()) {
-                throw new Error(errorMsg.DATE_FMT);
+                throw new Error(invalidDateFmt);
               }
-              return date.format('YYYY-MM-DD HH:mm:ss');
+              return date.format(dateFmt);
             },
           })
           .check((argv) => {
             if (!(argv.name || argv.desc || argv.deadline)) {
-              throw new Error(errorMsg.OPTION_AMOUNT);
+              throw new Error(optionCount);
             }
             return true;
           });
     })
     .strict()
-    .demandCommand(1, errorMsg.EMPTY_REQ)
+    .demandCommand(1, emptyReq)
     .help()
     .parse();
 
