@@ -1,7 +1,7 @@
 const {expect} = require('chai');
 const mock = require('mock-fs');
 const fs = require('fs');
-const {SimpleDatabase} = require('../src/database');
+const SimpleDatabase = require('../src/database');
 const {encode} = require('../src/cipher');
 
 const headerLength = 2;
