@@ -2,7 +2,7 @@ const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
 const moment = require('moment');
 
-const dateFmt = 'YYYY-MM-DD HH:MM:SS';
+const dateFmt = 'YYYY-MM-DD HH:mm:ss';
 
 const idMax = 65536;
 
@@ -16,6 +16,15 @@ const idCheck = (id) => {
     throw new Error(idLength);
   }
   return id;
+};
+
+const checkDate = (deadline) => {
+  const date = moment(deadline, dateFmt, true);
+  if (!date.isValid()) {
+    throw new Error(invalidDateFmt);
+  }
+
+  return date.format(dateFmt);
 };
 
 const arg = yargs(hideBin(process.argv))
@@ -81,13 +90,7 @@ const arg = yargs(hideBin(process.argv))
             alias: 'l',
             type: 'data',
             demandOption: true,
-            coerce: (deadline) => {
-              const date = moment(deadline, dateFmt, true);
-              if (!date.isValid()) {
-                throw new Error(invalidDateFmt);
-              }
-              return date.format(dateFmt);
-            },
+            coerce: (deadline) => checkDate(deadline),
           })
           .strictOptions();
     })
@@ -114,13 +117,7 @@ const arg = yargs(hideBin(process.argv))
             describe: 'Task\'s deadline',
             alias: 'l',
             type: 'date',
-            coerce: (deadline) => {
-              const date = moment(deadline, dateFmt, true);
-              if (!date.isValid()) {
-                throw new Error(invalidDateFmt);
-              }
-              return date.format(dateFmt);
-            },
+            coerce: (deadline) => checkDate(deadline),
           })
           .check((argv) => {
             if (!(argv.name || argv.desc || argv.deadline)) {
