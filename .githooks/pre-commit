@@ -3,7 +3,7 @@
 HAS_ISSUES=0
 
 for file in $(git diff --name-only --staged); do
-    if [[ $file == *.js ]]; then
+    if [[ -f $file && $file == *.js ]]; then
         npx eslint $file
         if [ $? -ne 0 ]; then
             HAS_ISSUES=1
