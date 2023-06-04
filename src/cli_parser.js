@@ -6,10 +6,11 @@ const dateFmt = 'YYYY-MM-DD HH:mm:ss';
 
 const idMax = 65536;
 
-const idLength = `ID must be a number in the range from 0 to ${idMax}`;
+const idLength = `ID must be a number in the range from 0 to ${idMax}.`;
 const invalidDateFmt = `Invalid date. Provide a date in the ${dateFmt} format.`;
-const optionCount = 'At least one option is required';
-const emptyReq = 'Empty request. Please input a command';
+const optionCount = 'At least one option is required.';
+const emptyReq = 'Empty request. Please input a command.';
+const emptyField = 'Empty filed. This field should not be empty.';
 
 const idCheck = (id) => {
   if (isNaN(id) || id < 0 || id > idMax) {
@@ -26,6 +27,14 @@ const checkDate = (deadline) => {
   }
 
   return date.format(dateFmt);
+};
+
+const checkNameDesc = (str) => {
+  if (str === '') {
+    throw new Error(emptyField);
+  }
+
+  return str;
 };
 
 const parser = yargs(hideBin(process.argv));
@@ -88,12 +97,14 @@ const setAdd = () => {
       alias: 'n',
       type: 'string',
       demandOption: true,
+      coerce: checkNameDesc,
     });
 
     yargs.option('desc', {
       describe: 'Description of the task',
       alias: 'd',
       type: 'string',
+      coerce: checkNameDesc,
     });
 
     yargs.option('deadline', {
@@ -120,12 +131,14 @@ const setEdit = () => {
       describe: 'Name of the task',
       alias: 'n',
       type: 'string',
+      coerce: checkNameDesc,
     });
 
     yargs.option('desc', {
       describe: 'Description of the task',
       alias: 'd',
       type: 'string',
+      coerce: checkNameDesc,
     });
 
     yargs.option('deadline', {
@@ -156,5 +169,7 @@ const parse = () => {
 
   return parser.parse();
 };
+
+console.log(parse());
 
 module.exports = {parse};
