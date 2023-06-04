@@ -24,7 +24,7 @@ class TaskController {
    */
   getDue() {
     const tasks = this.db.getAll(type).map((e) => toTask(e));
-    const due = tasks.filter((e) => e.complete === undefined);
+    const due = tasks.filter((e) => e.completed === undefined);
     sortByDate(due);
     return due;
   }
@@ -39,11 +39,11 @@ class TaskController {
     if (task === undefined) {
       throw Error(`No task with ${id} exists`);
     }
-    if (task.complete) {
-      throw Error('The task is already complete');
+    if (task.completed) {
+      throw Error('The task is already completed');
     }
     const now = new Date();
-    const changes = {'id': task.id, 'complete': now.getTime()};
+    const changes = {'id': task.id, 'completed': now.getTime()};
     return this.db.edit(type, changes);
   }
 
@@ -54,7 +54,7 @@ class TaskController {
    */
   add(task) {
     const entity = toEntity(task);
-    if (entity.complete !== undefined) {
+    if (entity.completed !== undefined) {
       throw Error('Cannot add an already completed task');
     }
     return this.db.add(type, entity);
@@ -67,7 +67,7 @@ class TaskController {
    */
   edit(changes) {
     const entity = toEntity(changes);
-    if (entity.complete !== undefined) {
+    if (entity.completed !== undefined) {
       throw Error('Cannot edit completion time or status');
     }
     return this.db.edit(type, entity);
@@ -81,7 +81,7 @@ class TaskController {
     const tasks = this.db.getAll(type).map((e) => toTask(e));
     const now = new Date().getTime();
     const overdue = tasks.filter((e) => {
-      return e.complete === undefined &&
+      return e.completed === undefined &&
         e.deadline !== undefined &&
         e.deadline < now;
     });
@@ -103,13 +103,13 @@ class TaskController {
    */
   getCompleted() {
     const tasks = this.db.getAll(type).map((e) => toTask(e));
-    const res = tasks.filter((e) => e.complete !== undefined);
-    sortByDate(res, 'complete', -1);
+    const res = tasks.filter((e) => e.completed !== undefined);
+    sortByDate(res, 'completed', -1);
     return res;
   }
 }
 
-const taskKeys = ['id', 'title', 'description', 'deadline', 'complete'];
+const taskKeys = ['id', 'title', 'description', 'deadline', 'completed'];
 
 const toEntity = (task) => {
   if (!task.title) {

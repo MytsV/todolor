@@ -50,11 +50,11 @@ describe('TaskController', () => {
       const timestamp = new Date().getTime();
       // Add through db not to depend on other controller's methods
       db.add(entityType, {'title': 'hello', 'odd': 'value'});
-      db.add(entityType, {'title': 'hi', 'complete': timestamp});
+      db.add(entityType, {'title': 'hi', 'completed': timestamp});
       expect(controller.getAll()).to.deep.equal([
         // Values which are not part of task are omitted
         {'title': 'hello', 'id': 0},
-        {'title': 'hi', 'complete': timestamp, 'id': 1},
+        {'title': 'hi', 'completed': timestamp, 'id': 1},
       ]);
     });
 
@@ -77,10 +77,10 @@ describe('TaskController', () => {
         stamps.push(new Date().getTime() + i);
       }
       const entities = [
-        {'title': 'hello', 'complete': stamps[2], 'deadline': stamps[0]},
+        {'title': 'hello', 'completed': stamps[2], 'deadline': stamps[0]},
         {'title': 'hi', 'deadline': stamps[2]},
         {'title': 'привіт!', 'description': 'dolor...'},
-        {'title': 'hello', 'complete': stamps[0]},
+        {'title': 'hello', 'completed': stamps[0]},
         {'title': 'hi', 'deadline': stamps[1]},
         {'title': 'hello', 'deadline': stamps[1]},
         {'title': '你好', 'deadline': stamps[2]},
@@ -113,10 +113,10 @@ describe('TaskController', () => {
       expect(controller.getDue().length).to.equal(0);
       const tasks = controller.getAll();
       expect(tasks.length).to.equal(1);
-      expect(tasks[0].complete).to.be.a('number');
+      expect(tasks[0].completed).to.be.a('number');
     });
 
-    it('Fails if a task is already complete', () => {
+    it('Fails if a task is already completed', () => {
       const db = new MockDatabase();
       const controller = new TaskController(db);
       db.add(entityType, {'title': 'hello'});
@@ -148,7 +148,7 @@ describe('TaskController', () => {
       const controller = new TaskController(db);
       let task = {'hello': 'world'};
       expect(() => controller.add(task)).to.throw();
-      task = {'title': 'hi', 'complete': new Date().getTime()};
+      task = {'title': 'hi', 'completed': new Date().getTime()};
       expect(() => controller.add(task)).to.throw();
     });
   });
@@ -168,7 +168,7 @@ describe('TaskController', () => {
       const db = new MockDatabase();
       const controller = new TaskController(db);
       controller.add({'title': 'hello'});
-      let changes = {'complete': new Date().getTime(), 'id': 0};
+      let changes = {'completed': new Date().getTime(), 'id': 0};
       expect(() => controller.edit(changes)).to.throw();
       changes = {'id': 1, 'title': 'hi'};
       expect(() => controller.edit(changes)).to.throw();
@@ -184,7 +184,7 @@ describe('TaskController', () => {
       const overdueSecond = new Date().getTime() - muchTime;
       const due = new Date().getTime() + muchTime;
       const entities = [
-        {'title': 'hello', 'complete': due, 'deadline': overdueFirst},
+        {'title': 'hello', 'completed': due, 'deadline': overdueFirst},
         {'title': 'hi', 'deadline': overdueFirst},
         {'title': 'привіт!', 'description': 'dolor...'},
         {'title': 'hi', 'deadline': due},
@@ -221,11 +221,11 @@ describe('TaskController', () => {
       const controller = new TaskController(db);
       const timestamp = new Date().getTime();
       const entities = [
-        {'title': 'hello', 'complete': timestamp},
+        {'title': 'hello', 'completed': timestamp},
         {'title': 'hi', 'deadline': timestamp},
         {'title': 'привіт!', 'description': 'dolor...'},
-        {'title': 'hi', 'complete': timestamp + 1},
-        {'title': 'hello', 'complete': timestamp},
+        {'title': 'hi', 'completed': timestamp + 1},
+        {'title': 'hello', 'completed': timestamp},
       ];
       for (const entity of entities) {
         db.add(entityType, entity);
