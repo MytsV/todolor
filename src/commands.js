@@ -4,9 +4,18 @@ const hl = require('./highlight');
 
 const quotes = [
   'Let\'s do it!',
-  'If I can you can as well',
+  'If I can you can as well!',
   'Kill them with success and bury them with a smile.',
   'There\'s power in looking silly and not caring that you do.',
+  'Doing nothing is very hard to do… you never know when you\'re finished.',
+  'The best way to appreciate your job is to imagine yourself without one.',
+  'Hard work never killed anybody, but why take a chance?',
+  'I like work; it fascinates me. I can sit and look at it for hours.',
+  'The only thing that ever sat its way to success was a hen.',
+  'Time is an illusion. Lunchtime is doubly so.',
+  'The reward for good work is more work.',
+  'If you see this that means you\'re in trouble, my friend!',
+  'Early to bed and early to rise probably indicates unskilled labor.',
 ];
 
 const chooseQuote = (str) => {
