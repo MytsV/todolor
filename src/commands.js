@@ -1,18 +1,30 @@
 const moment = require('moment');
 const {dateFmt} = require('./format');
+const hl = require('./highlight');
 
 const outputTask = (task) => {
-  // TODO: highlight completed tasks and output completion date
-  console.log(`[${task.id}] ${task.title}`);
+  const output = (str) => console.log(str);
+  const out = {
+    head: `[${task.id}] ${task.title}`,
+  };
+
   if (task.description) {
-    console.log(task.description);
+    out.desc = task.description;
   }
   if (task.deadline) {
     // TODO: highlight overdue tasks and display motivational quotes
     const date = moment(task.deadline);
-    console.log(date.format(dateFmt));
+    out.date = date.format(dateFmt);
   }
-  console.log('');
+  if (task.completed !== undefined) {
+    out.date = moment(task.completed).format(dateFmt);
+    Object.keys(out).forEach((key) => {
+      out[key] = hl.success(out[key]);
+    });
+  }
+
+  Object.keys(out).forEach((key) => output(out[key]));
+  output('');
 };
 
 const handleLs = (args, controller) => {
