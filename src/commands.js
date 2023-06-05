@@ -10,7 +10,7 @@ const quotes = [
 ];
 
 const chooseQuote = (str) => {
-  const quoteIndex = Math.floor(Math.random() * structuredClone.length);
+  const quoteIndex = Math.floor(Math.random() * str.length);
   return str[quoteIndex];
 };
 
