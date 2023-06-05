@@ -157,10 +157,24 @@ describe('TaskController', () => {
     it('Successfully edits a task', () => {
       const db = new MockDatabase();
       const controller = new TaskController(db);
-      controller.add({'title': 'hello'});
-      controller.edit({'title': 'hi', 'description': '!', 'id': 0});
+      const id = controller.add({'title': 'hello'});
+      const newId = controller.edit({
+        'title': 'hi',
+        'description': '!',
+        'id': id,
+      });
       expect(controller.getAll()).to.deep.equal([
-        {'title': 'hi', 'description': '!', 'id': 0},
+        {'title': 'hi', 'description': '!', 'id': newId},
+      ]);
+    });
+
+    it('Edits a task if there is no title in changes', () => {
+      const db = new MockDatabase();
+      const controller = new TaskController(db);
+      const id = controller.add({'title': 'hello'});
+      const newId = controller.edit({'description': '!', 'id': id});
+      expect(controller.getAll()).to.deep.equal([
+        {'title': 'hello', 'description': '!', 'id': newId},
       ]);
     });
 

@@ -68,7 +68,7 @@ class TaskController {
    * @return {string | number}
    */
   edit(changes) {
-    const entity = toEntity(changes);
+    const entity = copyValidKeys(changes);
     if (entity.completed !== undefined) {
       throw Error('Cannot edit completion time or status');
     }
