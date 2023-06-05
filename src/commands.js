@@ -10,40 +10,40 @@ const quotes = [
 ];
 
 const chooseQuote = (str) => {
-  const quoteIndex = Math.floor(Math.random() * str.length);
+  const quoteIndex = Math.floor(Math.random() * quotes.length);
   return str[quoteIndex];
 };
 
 const outputTask = (task) => {
-  const output = (str) => console.log(str);
-  const out = {
-    head: `[${task.id}] ${task.title}`,
-  };
+  const outLines = [`[${task.id}] ${task.title}`];
+  let highlighter = (str) => str;
+  let quote;
 
   if (task.description) {
-    out.desc = task.description;
+    outLines.push(task.description);
   }
   if (task.deadline) {
     const date = moment(task.deadline);
-    out.date = date.format(dateFmt);
+    outLines.push(`deadline: ${date.format(dateFmt)}`);
+
     const now = new Date().getTime();
     const overdue = task.completed === undefined && task.deadline < now;
     if (overdue) {
-      Object.keys(out).forEach((key) => {
-        out[key] = hl.error(out[key]);
-      });
-      out.quote = chooseQuote(quotes);
+      highlighter = hl.error;
+      quote = chooseQuote(quotes);
     }
   }
   if (task.completed !== undefined) {
-    out.date = moment(task.completed).format(dateFmt);
-    Object.keys(out).forEach((key) => {
-      out[key] = hl.success(out[key]);
-    });
+    highlighter = hl.success;
+    const completionDate = moment(task.completed).format(dateFmt);
+    outLines.push(`completed on: ${completionDate}`);
   }
 
-  Object.keys(out).forEach((key) => output(out[key]));
-  output('');
+  outLines.forEach((line) => console.log(highlighter(line)));
+  if (quote) {
+    console.log(quote);
+  }
+  console.log('');
 };
 
 const handleLs = (args, controller) => {
