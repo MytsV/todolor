@@ -44,10 +44,16 @@ const handleAdd = (args, controller) => {
   console.log(`Added new task with ID ${id}`);
 };
 
+const handleDelete = (args, controller) => {
+  controller.delete(args.id);
+  console.log(`Deleted a task with ID ${args.id}`);
+};
+
 // TODO: implement the rest of commands
 const commands = {
   'ls': handleLs,
   'add': handleAdd,
+  'delete': handleDelete,
 };
 
 module.exports = commands;
