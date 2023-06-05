@@ -2,6 +2,18 @@ const moment = require('moment');
 const {dateFmt} = require('./format');
 const hl = require('./highlight');
 
+const qoutes = [
+  'Let\'s do it!',
+  'If I can you can as well',
+  'Kill them with success and bury them with a smile.',
+  'There\'s power in looking silly and not caring that you do.',
+];
+
+const chooseQoute = (str) => {
+  const qouteIndex = Math.floor(Math.random() * structuredClone.length);
+  return str[qouteIndex];
+};
+
 const outputTask = (task) => {
   const output = (str) => console.log(str);
   const out = {
@@ -12,9 +24,16 @@ const outputTask = (task) => {
     out.desc = task.description;
   }
   if (task.deadline) {
-    // TODO: highlight overdue tasks and display motivational quotes
     const date = moment(task.deadline);
     out.date = date.format(dateFmt);
+    const now = new Date().getTime();
+    const overdue = task.completed === undefined && task.deadline < now;
+    if (overdue) {
+      Object.keys(out).forEach((key) => {
+        out[key] = hl.error(out[key]);
+      });
+      out.qoute = chooseQoute(qoutes);
+    }
   }
   if (task.completed !== undefined) {
     out.date = moment(task.completed).format(dateFmt);
