@@ -54,12 +54,30 @@ const handleComplete = (args, controller) => {
   console.log(`Completed a task with ID ${args.id}`);
 };
 
-// TODO: implement the rest of commands
+const handleEdit = (args, controller) => {
+  const task = {
+    'id': args.id,
+  };
+  if (args.name) {
+    task['title'] = args.name;
+  }
+  if (args.desc) {
+    task['description'] = args.desc;
+  }
+  if (args.deadline) {
+    const date = moment(args.deadline, dateFmt);
+    task['deadline'] = date.valueOf();
+  }
+  const id = controller.edit(task);
+  console.log(`Edited task with ID ${id}`);
+};
+
 const commands = {
   'ls': handleLs,
   'add': handleAdd,
   'delete': handleDelete,
   'complete': handleComplete,
+  'edit': handleEdit,
 };
 
 module.exports = commands;
