@@ -2,11 +2,9 @@
 
 ## Table of contents
 * [General description](#general-description)
-* [Variant](#variant)
 * [Setup and usage](#setup-and-usage)
-* [Commit with failing tests](#commit-with-failing-tests)
-* [Example](#example)
-* [Conclusion](#conclusion)
+* [Troubleshooting](#troubleshooting)
+* [Contribution](#contribution)
 
 ## General description
 Dolor is a state of great sorrow or distress. 
