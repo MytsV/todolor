@@ -2,16 +2,16 @@ const moment = require('moment');
 const {dateFmt} = require('./format');
 const hl = require('./highlight');
 
-const qoutes = [
+const quotes = [
   'Let\'s do it!',
   'If I can you can as well',
   'Kill them with success and bury them with a smile.',
   'There\'s power in looking silly and not caring that you do.',
 ];
 
-const chooseQoute = (str) => {
-  const qouteIndex = Math.floor(Math.random() * structuredClone.length);
-  return str[qouteIndex];
+const chooseQuote = (str) => {
+  const quoteIndex = Math.floor(Math.random() * structuredClone.length);
+  return str[quoteIndex];
 };
 
 const outputTask = (task) => {
@@ -32,7 +32,7 @@ const outputTask = (task) => {
       Object.keys(out).forEach((key) => {
         out[key] = hl.error(out[key]);
       });
-      out.qoute = chooseQoute(qoutes);
+      out.quote = chooseQuote(quotes);
     }
   }
   if (task.completed !== undefined) {
