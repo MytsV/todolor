@@ -164,4 +164,4 @@ class SimpleDatabase {
   }
 }
 
-module.exports = {SimpleDatabase, parse};
+module.exports = SimpleDatabase;

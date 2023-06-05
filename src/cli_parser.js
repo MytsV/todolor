@@ -2,8 +2,7 @@ const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
 const moment = require('moment');
 
-const dateFmt = 'YYYY-MM-DD HH:mm:ss';
-
+const {dateFmt} = require('./format');
 const idMax = 65536;
 
 const idLength = `ID must be a number in the range from 0 to ${idMax}.`;
